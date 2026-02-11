@@ -10,7 +10,6 @@ from sentence_transformers import SentenceTransformer, util
 from sqlalchemy import create_engine, Column, String, Float, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
 import pypdf
 import docx
 from PIL import Image
@@ -178,3 +177,5 @@ async def submit_referral(
     finally: db.close()
 
     return {"status": "success", "message": "Referral submitted successfully!"}
+
+    

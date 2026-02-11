@@ -187,7 +187,7 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/form-options')
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/form-options`)
         setAllSkills(response.data.skills)
         setRoleSkillsMap(response.data.role_skills) 
         setLoading(false)
@@ -304,7 +304,7 @@ function App() {
     data.append('resume', resume)
 
     try {
-      const res = await axios.post('http://127.0.0.1:8000/submit', data)
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/submit`, data)
       showToast(res.data.message, "success")
       setFormData({ employee_id: '', candidate_name: '', candidate_contact: '', position: '', positionLabel: '', why_fit: '' })
       setSelectedSkills([])
