@@ -1,0 +1,78 @@
+{
+  "sr_data_mis_analyst": [
+    "excel",
+    "sql"
+  ],
+  "sr_network_admin": [
+    "palo_alto_firewalls",
+    "azure"
+  ],
+  "ar_cash_app_specialist": [
+    "cash_application",
+    "erp_systems"
+  ],
+  "ai_developer": [
+    "llm",
+    "python"
+  ],
+  "comm_content_lead": [
+    "internal_communications",
+    "visual_storytelling"
+  ],
+  "crm_erp_support_specialist": [
+    "crm_support",
+    "erp_support"
+  ],
+  "data_migration_lead": [
+    "data_migration",
+    "etl"
+  ],
+  "lead_analyst_ap_ar": [
+    "accounts_payable",
+    "accounts_receivable"
+  ],
+  "gl_accountant_uk": [
+    "general_ledger",
+    "month_end_close"
+  ],
+  "director_hr": [
+    "hr_strategy",
+    "india_labor_laws"
+  ],
+  "hr_tech_lead_recruiting": [
+    "it_recruiting",
+    "full_cycle_recruiting"
+  ],
+  "sr_transformational_consultant": [
+    "lean_six_sigma_black_belt",
+    "business_transformation"
+  ],
+  "director_business_transformation": [
+    "transformation_strategy",
+    "change_management"
+  ],
+  "sr_tech_specialist_user_support": [
+    "m365",
+    "azure_ad"
+  ],
+  "sr_powerapps_dev": [
+    "canvas_apps",
+    "model_driven_apps"
+  ],
+  "powerapps_support_role": [
+    "powerapps_formulas",
+    "l1_l2_support"
+  ],
+  "sr_power_automate_dev": [
+    "power_automate_desktop",
+    "rpa_methodology"
+  ],
+  "sap_change_release_specialist": [
+    "sap_charm",
+    "it_change_management"
+  ],
+  "python_engineer": [
+    "python",
+    "rest_api"
+  ]
+}

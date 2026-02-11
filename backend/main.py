@@ -56,7 +56,6 @@ ALLOWED_FILE_TYPES = [
     "image/png", "image/jpeg"
 ]
 MAX_FILE_SIZE = 5 * 1024 * 1024 
-# UPDATED: Lower threshold to catch more "similar" content (0.5 is stricter)
 SIMILARITY_THRESHOLD = 0.5 
 
 # --- STORAGE SETUP ---
@@ -75,14 +74,17 @@ print("AI Model Loaded!")
 # --- HELPERS ---
 def load_json(filename):
     if not os.path.exists(filename):
-        return {} if "mandatory" in filename or "compulsory" in filename else []
+        # Updated to return dict {} for non_negotiable file if missing, else list []
+        if any(x in filename for x in ["mandatory", "compulsory", "non_negotiable"]):
+            return {}
+        return []
     with open(filename, "r") as f:
         return json.load(f)
 
 ROLES_DB = load_json("roles.json")
 SKILLS_DB = load_json("skills.json")
 ROLE_SKILLS_DB = load_json("skills_mandatory.json") 
-COMPULSORY_DB = load_json("compulsory.json")
+NON_NEGOTIABLE_DB = load_json("non_negotiable.json") # Replaced COMPULSORY_DB
 
 def sanitize_filename(text):
     return re.sub(r'[^a-zA-Z0-9]', '_', text)
@@ -130,22 +132,14 @@ def extract_text_from_file(file_bytes, filename):
 
 def clean_text(text):
     """Removes newlines and extra spaces for better AI comparison"""
-    # Replace newlines with spaces
     text = text.replace('\n', ' ')
-    # Remove multiple spaces
     return re.sub(r'\s+', ' ', text).strip()
 
 def extract_about_section(text):
-    """
-    Extracts summary/about section.
-    UPDATED: Added more stop_headers to prevent capturing 'Contact' or 'Education' info.
-    """
     text_lower = text.lower()
     
-    # Priority headers (Longer matches first to avoid partials)
     headers = ["professional objective", "professional summary", "objective", "summary", "about me", "profile", "about"]
     
-    # Headers that signal the END of the about section
     stop_headers = [
         "experience", "work history", "employment", 
         "education", "academic", 
@@ -158,11 +152,9 @@ def extract_about_section(text):
     start_idx = -1
     best_header_len = 0
     
-    # 1. Find the Start
     for h in headers:
         idx = text_lower.find(h)
         if idx != -1:
-            # We prefer the first occurrence found
             if start_idx == -1 or idx < start_idx:
                 start_idx = idx
                 best_header_len = len(h)
@@ -171,24 +163,20 @@ def extract_about_section(text):
         content_start = start_idx + best_header_len
         relevant_text = text[content_start:]
         
-        # 2. Find the End (Stop at the nearest Stop Header)
         relevant_lower = relevant_text.lower()
         end_idx = len(relevant_text)
         
         for stop in stop_headers:
             s_idx = relevant_lower.find(stop)
-            # We want the *earliest* stop header found
             if s_idx != -1 and s_idx < end_idx:
                 end_idx = s_idx
                 
         extracted = relevant_text[:end_idx].strip()
-        # Fallback: if extraction is suspiciously short (<10 chars), might be a parsing error, return raw fallback
         if len(extracted) < 10:
              return clean_text(text[:800])
              
         return clean_text(extracted)
     
-    # Fallback: If no headers found, grab first 800 chars (approx 1 page top half)
     return clean_text(text[:800])
 
 @app.get("/form-options")
@@ -213,17 +201,25 @@ async def submit_referral(
     # 2. VALIDATION: SKILLS
     submitted_skills = [s.strip() for s in skills.split(",") if s.strip()]
     
-    if position in COMPULSORY_DB:
-        required_skills = set(COMPULSORY_DB[position])
-        has_mandatory = any(s in required_skills for s in submitted_skills)
-        if not has_mandatory:
-            raise HTTPException(status_code=400, detail="Skills listed not adequate for the role (Missing compulsory skill).")
+    # --- UPDATED LOGIC: Non-Negotiable Skills Check ---
+    if position in NON_NEGOTIABLE_DB:
+        required_skills = set(NON_NEGOTIABLE_DB[position])
+        submitted_skills_set = set(submitted_skills)
+        
+        # Check if ALL required skills are present in the submitted skills
+        if not required_skills.issubset(submitted_skills_set):
+            # Calculate which specific skills are missing for the error message
+            missing = required_skills - submitted_skills_set
+            missing_str = ", ".join(missing)
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Skills listed are not adequate for the role. Missing non-negotiable skills: {missing_str}"
+            )
             
     # 3. VALIDATION: AI SIMILARITY CHECK
     extracted_text = extract_text_from_file(file_content, resume.filename)
     about_section = extract_about_section(extracted_text)
     
-    # DEBUG: Print what we found (Check your terminal when you upload!)
     print(f"\n--- DEBUG: Extracted About Section ---\n{about_section[:200]}...\n--------------------------------------")
     
     if about_section and len(about_section) > 20:
