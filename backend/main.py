@@ -59,7 +59,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(DATA_DIR, exist_ok=True)
 
 # LOAD AI MODEL
-model = SentenceTransformer('all-MiniLM-L6-v2')
+model = None  # We start with nothing so the server boots fast
 
 # HELPERS
 def load_json(filename):
@@ -140,6 +140,12 @@ async def submit_referral(
     skills: Annotated[str, Form()], 
     resume: Annotated[UploadFile, File()]
 ):
+
+    global model
+    if model is None:
+        print("Loading AI Model for the first time...")
+        model = SentenceTransformer('all-MiniLM-L6-v2')
+
     file_content = await resume.read()
     if len(file_content) > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="File too large.")
