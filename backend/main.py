@@ -12,8 +12,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import pypdf
 import docx
-from PIL import Image
-import pytesseract
+# REMOVED: import pytesseract
+# REMOVED: from PIL import Image (Not needed if we skip OCR)
 
 # 1. Setup SQLite
 DB_DIR = "referral_db"
@@ -42,7 +42,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Simplified for local/standard use
+    allow_origins=["*"], 
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -99,7 +99,9 @@ def extract_text_from_file(file_bytes, filename):
             for para in doc.paragraphs:
                 text += para.text + "\n"
         elif ext in ['png', 'jpg', 'jpeg']:
-            text = pytesseract.image_to_string(Image.open(io.BytesIO(file_bytes)))
+            # MODIFIED: Skipped OCR to avoid Tesseract dependency on Render
+            print("Image uploaded: OCR text extraction skipped for optimization.")
+            text = "" 
     except Exception as e: print(f"Extraction Error: {e}")
     return text
 
@@ -153,6 +155,8 @@ async def submit_referral(
     # 2. AI Similarity Check
     extracted = extract_text_from_file(file_content, resume.filename)
     about = extract_about_section(extracted)
+    
+    # Only run AI check if we actually extracted text (PDF/Docx)
     if about and len(about) > 20:
         score = util.cos_sim(model.encode(why_fit), model.encode(about)).item()
         if score > SIMILARITY_THRESHOLD:
@@ -177,5 +181,3 @@ async def submit_referral(
     finally: db.close()
 
     return {"status": "success", "message": "Referral submitted successfully!"}
-
-    

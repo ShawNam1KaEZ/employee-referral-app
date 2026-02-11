@@ -1,9 +1,4 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
+// You can revert to this simple config if you are done with tunnels
 export default defineConfig({
   plugins: [react()],
-  server: {
-    allowedHosts: ['.loca.lt'] // This allows localtunnel to access your Vite server
-  }
 })
