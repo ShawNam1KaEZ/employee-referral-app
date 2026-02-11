@@ -1,0 +1,79 @@
+[
+    {
+        "id": "812867c8-682d-4ccc-9c88-63310c0eb48d",
+        "employee_id": "200",
+        "candidate_name": "kajsdc",
+        "contact": "bscbak@lknaslkc.asc",
+        "position": "sr_data_mis_analyst",
+        "skills": [
+            "data_analysis",
+            "data_automation",
+            "data_engineering",
+            "master_data_management",
+            "relational_databases",
+            "cortex_data_lake",
+            "dlp",
+            "data_visualization"
+        ],
+        "why_fit": "jasbcjkac ansclknasclk ",
+        "about": "nscnlkcsa asnclkasncas",
+        "resume_path": "resume_file\\200_kajsdc_sr_data_mis_analyst.pdf",
+        "original_filename": "NAVSAN_website_Improvements_task_11zon.pdf",
+        "ai_score": 0.4329
+    },
+    {
+        "id": "ac06237b-0f1e-4bfa-845d-cd450caa20fc",
+        "employee_id": "313",
+        "candidate_name": "Shawn",
+        "contact": "sclanlan@cbja.cis",
+        "position": "sr_data_mis_analyst",
+        "skills": [
+            "data_analysis",
+            "data_automation",
+            "data_cleansing",
+            "data_modeling",
+            "data_migration",
+            "data_visualization",
+            "data_engineering"
+        ],
+        "why_fit": "jsabljsc knslnlasd lknsclakc",
+        "about": "jssdsad knsdkas ikn",
+        "resume_path": "resume_file\\313_Shawn_sr_data_mis_analyst.pdf",
+        "original_filename": "NAVSAN INDIA INSURANCE POLICY.pdf",
+        "ai_score": 0.594
+    },
+    {
+        "id": "7f283bea-13ab-4e43-b872-4ad34e2aec86",
+        "employee_id": "21",
+        "candidate_name": "sha",
+        "contact": "salj@nsa.nlca",
+        "position": "sr_network_admin",
+        "skills": [
+            "azure_functions",
+            "accounts_receivable",
+            "api_development",
+            "network_migration",
+            "networking_fundamentals"
+        ],
+        "why_fit": "avlnaldnvlav",
+        "resume_path": "resume_file\\21_sha_sr_network_admin.pdf",
+        "original_filename": "NAVSAN_Emp_Referrrals_test.pdf"
+    },
+    {
+        "id": "001cea55-8a62-48ef-8819-c8db05474ec0",
+        "employee_id": "2131",
+        "candidate_name": "dvavdsav",
+        "contact": "bkjca@lnlav.kna",
+        "position": "sr_data_mis_analyst",
+        "skills": [
+            "power_bi",
+            "excel",
+            "power_query",
+            "data_automation",
+            "sql"
+        ],
+        "why_fit": "Computer science student seeking software engineering to apply skills in technical developing innovative eager to contribute oriented team.",
+        "resume_path": "resume_file\\2131_dvavdsav_sr_data_mis_analyst.pdf",
+        "original_filename": "Shawn_Stanley_Resume_edttt.pdf"
+    }
+]

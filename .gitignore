@@ -1,0 +1,13 @@
+# React junk
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# Python junk
+backend/__pycache__/
+backend/venv/
+backend/.env
+*.pyc
+
+# OS junk
+.DS_Store

@@ -1,0 +1,21 @@
+[
+  {"id": "sr_data_mis_analyst", "label": "Senior Data & MIS Analyst"},
+  {"id": "sr_network_admin", "label": "Senior Network Administrator"},
+  {"id": "ar_cash_app_specialist", "label": "AR Cash Application Specialist"},
+  {"id": "ai_developer", "label": "AI Developer"},
+  {"id": "comm_content_lead", "label": "Communication and Content Lead"},
+  {"id": "crm_erp_support_specialist", "label": "CRM & ERP Support Specialist"},
+  {"id": "data_migration_lead", "label": "Data Migration Expert/Lead"},
+  {"id": "lead_analyst_ap_ar", "label": "Lead Analyst - AP & AR"},
+  {"id": "gl_accountant_uk", "label": "General Ledger Accountant (UK)"},
+  {"id": "director_hr", "label": "Director of Human Resources"},
+  {"id": "hr_tech_lead_recruiting", "label": "HR Technical Lead – IT & Technology Recruiting"},
+  {"id": "sr_transformational_consultant", "label": "SR Transformational Consultant"},
+  {"id": "director_business_transformation", "label": "Director - Business Transformation"},
+  {"id": "sr_tech_specialist_user_support", "label": "Senior Technical Specialist – User Support"},
+  {"id": "sr_powerapps_dev", "label": "Senior PowerApps Developer"},
+  {"id": "powerapps_support_role", "label": "PowerApps Support Role"},
+  {"id": "sr_power_automate_dev", "label": "Senior Power Automate Developer"},
+  {"id": "sap_change_release_specialist", "label": "SAP Change and Release Specialist"},
+  {"id": "python_engineer", "label": "Python Engineer"}
+]
