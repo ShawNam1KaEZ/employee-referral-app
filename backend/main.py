@@ -12,8 +12,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import pypdf
 import docx
-# REMOVED: import pytesseract
-# REMOVED: from PIL import Image (Not needed if we skip OCR)
+# RESTORED: Image processing libraries
+import pytesseract
+from PIL import Image 
 
 # 1. Setup SQLite
 DB_DIR = "referral_db"
@@ -58,8 +59,8 @@ DATA_FILE = os.path.join(DATA_DIR, "referrals.json")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(DATA_DIR, exist_ok=True)
 
-# LOAD AI MODEL
-model = None  # We start with nothing so the server boots fast
+# LOAD AI MODEL (Lazy Load container)
+model = None 
 
 # HELPERS
 def load_json(filename):
@@ -99,9 +100,13 @@ def extract_text_from_file(file_bytes, filename):
             for para in doc.paragraphs:
                 text += para.text + "\n"
         elif ext in ['png', 'jpg', 'jpeg']:
-            # MODIFIED: Skipped OCR to avoid Tesseract dependency on Render
-            print("Image uploaded: OCR text extraction skipped for optimization.")
-            text = "" 
+            # RESTORED: OCR Logic using Tesseract
+            try:
+                image = Image.open(io.BytesIO(file_bytes))
+                text = pytesseract.image_to_string(image)
+            except Exception as e:
+                print(f"OCR specific error: {e}")
+                
     except Exception as e: print(f"Extraction Error: {e}")
     return text
 
@@ -143,30 +148,97 @@ async def submit_referral(
 
     global model
     if model is None:
-        print("Loading AI Model for the first time...")
+        print("Loading AI Model (Lazy Load)...")
         model = SentenceTransformer('all-MiniLM-L6-v2')
 
     file_content = await resume.read()
     if len(file_content) > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="File too large.")
 
-    # 1. Non-Negotiable Skills Check
+    # 1. Non-Negotiable Skills Check (Case-Insensitive Strict Subset)
+    # Define submitted_skills (LIST) for DB storage and submitted_skills_set (SET) for validation
     submitted_skills = [s.strip() for s in skills.split(",") if s.strip()]
-    if position in NON_NEGOTIABLE_DB:
-        required = set(NON_NEGOTIABLE_DB[position])
-        if not required.issubset(set(submitted_skills)):
-            missing = ", ".join(required - set(submitted_skills))
-            raise HTTPException(status_code=400, detail=f"Missing non-negotiable skills: {missing}")
-            
-    # 2. AI Similarity Check
-    extracted = extract_text_from_file(file_content, resume.filename)
-    about = extract_about_section(extracted)
+    submitted_skills_set = {s.lower() for s in submitted_skills}
+
+    print(f"DEBUG: Frontend sent these IDs: {submitted_skills_set}") 
     
-    # Only run AI check if we actually extracted text (PDF/Docx)
-    if about and len(about) > 20:
-        score = util.cos_sim(model.encode(why_fit), model.encode(about)).item()
-        if score > SIMILARITY_THRESHOLD:
-            raise HTTPException(status_code=400, detail="Endorsement is too similar to the resume. Please write a unique one.")
+    if position in NON_NEGOTIABLE_DB:
+        # Load requirements and convert them to lowercase
+        required_original = NON_NEGOTIABLE_DB[position]
+        required_lower = {r.strip().lower() for r in required_original}
+        
+        # Check if ALL required skills are present in submission
+        if not required_lower.issubset(submitted_skills_set):
+            # Find missing skills (logic uses lowercase to compare)
+            missing_lower = required_lower - submitted_skills_set
+            missing_readable = [r for r in required_original if r.strip().lower() in missing_lower]
+            
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Submission rejected. Missing non-negotiable skills"
+            )
+
+    # 2. AI Similarity Check (Whole-Block Rephrasing Detection)
+
+    extracted = extract_text_from_file(file_content, resume.filename)
+
+    
+
+    # Get the Resume Summary (or first 1000 chars if not found)
+
+    about_section = extract_about_section(extracted)
+
+    resume_summary = about_section if (about_section and len(about_section) > 50) else extracted[:1000]
+
+
+    # CONFIGURATION
+
+    # 0.60 is a good threshold for "Whole Paragraph" comparison.
+
+    # Since we are comparing large blocks, exact word matches matter less, 
+
+    # and "overall meaning" matters more. 0.60 - 0.70 usually catches rephrasing.
+
+    BLOCK_MATCH_THRESHOLD = 0.65 
+
+
+    if resume_summary and len(why_fit) > 20:
+
+        # A. Encode the ENTIRE Resume Summary as one vector
+
+        resume_embedding = model.encode(resume_summary)
+
+        
+
+        # B. Encode the ENTIRE User Input as one vector
+
+        input_embedding = model.encode(why_fit)
+
+        
+
+        # C. Compute Similarity (1-to-1 Comparison)
+
+        # This checks: "Is the meaning of Input effectively the same as the Resume?"
+
+        similarity_score = util.cos_sim(input_embedding, resume_embedding).item()
+
+        
+
+        print(f"DEBUG: Whole-Block Similarity Score: {similarity_score:.4f}")
+
+
+        # D. Block if the *meaning* is too similar
+
+        if similarity_score > BLOCK_MATCH_THRESHOLD:
+
+             raise HTTPException(
+
+                status_code=400, 
+
+                detail="Your endorsement is too similar to the resume's summary."
+
+            )
+
 
     # 3. Save File & DB
     safe_name = f"{sanitize_filename(employee_id)}_{sanitize_filename(candidate_name)}.{resume.filename.split('.')[-1]}"
