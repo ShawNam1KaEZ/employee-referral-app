@@ -6,15 +6,15 @@ import io
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Annotated
-from sentence_transformers import SentenceTransformer, util
+# from sentence_transformers import SentenceTransformer, util
 from sqlalchemy import create_engine, Column, String, Float, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import pypdf
-import docx
+# import pypdf
+# import docx
 # RESTORED: Image processing libraries
-import pytesseract
-from PIL import Image 
+# import pytesseract
+# from PIL import Image 
 
 # 1. Setup SQLite
 DB_DIR = "referral_db"
@@ -90,24 +90,24 @@ def save_to_json_file(data):
 def extract_text_from_file(file_bytes, filename):
     ext = filename.split('.')[-1].lower()
     text = ""
-    try:
-        if ext == 'pdf':
-            pdf = pypdf.PdfReader(io.BytesIO(file_bytes))
-            for page in pdf.pages:
-                text += (page.extract_text() or "") + "\n"
-        elif ext == 'docx':
-            doc = docx.Document(io.BytesIO(file_bytes))
-            for para in doc.paragraphs:
-                text += para.text + "\n"
-        elif ext in ['png', 'jpg', 'jpeg']:
-            # RESTORED: OCR Logic using Tesseract
-            try:
-                image = Image.open(io.BytesIO(file_bytes))
-                text = pytesseract.image_to_string(image)
-            except Exception as e:
-                print(f"OCR specific error: {e}")
-                
-    except Exception as e: print(f"Extraction Error: {e}")
+    # try:
+    #     if ext == 'pdf':
+    #         pdf = pypdf.PdfReader(io.BytesIO(file_bytes))
+    #         for page in pdf.pages:
+    #             text += (page.extract_text() or "") + "\n"
+    #     elif ext == 'docx':
+    #         doc = docx.Document(io.BytesIO(file_bytes))
+    #         for para in doc.paragraphs:
+    #             text += para.text + "\n"
+    #     elif ext in ['png', 'jpg', 'jpeg']:
+    #         # RESTORED: OCR Logic using Tesseract
+    #         try:
+    #             image = Image.open(io.BytesIO(file_bytes))
+    #             text = pytesseract.image_to_string(image)
+    #         except Exception as e:
+    #             print(f"OCR specific error: {e}")
+    #             
+    # except Exception as e: print(f"Extraction Error: {e}")
     return text
 
 def extract_about_section(text):
@@ -146,10 +146,10 @@ async def submit_referral(
     resume: Annotated[UploadFile, File()]
 ):
 
-    global model
-    if model is None:
-        print("Loading AI Model (Lazy Load)...")
-        model = SentenceTransformer('all-MiniLM-L6-v2')
+    # global model
+    # if model is None:
+    #     print("Loading AI Model (Lazy Load)...")
+    #     model = SentenceTransformer('all-MiniLM-L6-v2')
 
     file_content = await resume.read()
     if len(file_content) > MAX_FILE_SIZE:
@@ -180,15 +180,15 @@ async def submit_referral(
 
     # 2. AI Similarity Check (Whole-Block Rephrasing Detection)
 
-    extracted = extract_text_from_file(file_content, resume.filename)
+    # extracted = extract_text_from_file(file_content, resume.filename)
 
     
 
     # Get the Resume Summary (or first 1000 chars if not found)
 
-    about_section = extract_about_section(extracted)
+    # about_section = extract_about_section(extracted)
 
-    resume_summary = about_section if (about_section and len(about_section) > 50) else extracted[:1000]
+    # resume_summary = about_section if (about_section and len(about_section) > 50) else extracted[:1000]
 
 
     # CONFIGURATION
@@ -199,45 +199,45 @@ async def submit_referral(
 
     # and "overall meaning" matters more. 0.60 - 0.70 usually catches rephrasing.
 
-    BLOCK_MATCH_THRESHOLD = 0.65 
+    # BLOCK_MATCH_THRESHOLD = 0.65 
 
 
-    if resume_summary and len(why_fit) > 20:
+    # if resume_summary and len(why_fit) > 20:
 
-        # A. Encode the ENTIRE Resume Summary as one vector
+    #     # A. Encode the ENTIRE Resume Summary as one vector
 
-        resume_embedding = model.encode(resume_summary)
+    #     resume_embedding = model.encode(resume_summary)
 
-        
+    #     
 
-        # B. Encode the ENTIRE User Input as one vector
+    #     # B. Encode the ENTIRE User Input as one vector
 
-        input_embedding = model.encode(why_fit)
+    #     input_embedding = model.encode(why_fit)
 
-        
+    #     
 
-        # C. Compute Similarity (1-to-1 Comparison)
+    #     # C. Compute Similarity (1-to-1 Comparison)
 
-        # This checks: "Is the meaning of Input effectively the same as the Resume?"
+    #     # This checks: "Is the meaning of Input effectively the same as the Resume?"
 
-        similarity_score = util.cos_sim(input_embedding, resume_embedding).item()
+    #     similarity_score = util.cos_sim(input_embedding, resume_embedding).item()
 
-        
+    #     
 
-        print(f"DEBUG: Whole-Block Similarity Score: {similarity_score:.4f}")
+    #     print(f"DEBUG: Whole-Block Similarity Score: {similarity_score:.4f}")
 
 
-        # D. Block if the *meaning* is too similar
+    #     # D. Block if the *meaning* is too similar
 
-        if similarity_score > BLOCK_MATCH_THRESHOLD:
+    #     if similarity_score > BLOCK_MATCH_THRESHOLD:
 
-             raise HTTPException(
+    #          raise HTTPException(
 
-                status_code=400, 
+    #             status_code=400, 
 
-                detail="Your endorsement is too similar to the resume's summary."
+    #             detail="Your endorsement is too similar to the resume's summary."
 
-            )
+    #         )
 
 
     # 3. Save File & DB
