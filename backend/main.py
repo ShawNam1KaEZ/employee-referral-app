@@ -8,7 +8,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Annotated
 # from sentence_transformers import SentenceTransformer, util
@@ -183,7 +183,8 @@ async def submit_referral(
     position: Annotated[str, Form()], 
     why_fit: Annotated[str, Form()],
     skills: Annotated[str, Form()], 
-    resume: Annotated[UploadFile, File()]
+    resume: Annotated[UploadFile, File()],
+    background_tasks: BackgroundTasks # FIX 1: Added parameter
 ):
 
     # global model
@@ -298,7 +299,7 @@ async def submit_referral(
         db.commit()
     finally: db.close()
 
-    # SEND CONFIRMATION EMAIL (Just for test)
-    send_confirmation_email(ref_data)
+    # FIX 2: SEND CONFIRMATION EMAIL VIA BACKGROUND TASK
+    background_tasks.add_task(send_confirmation_email, ref_data)
 
     return {"status": "success", "message": "Referral submitted successfully!"}
