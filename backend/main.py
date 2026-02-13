@@ -94,14 +94,11 @@ def save_to_json_file(data):
 
 # NEW HELPER: Send Confirmation Email
 def send_confirmation_email(data):
-    # --- CONFIGURATION ---
     sender_email = "YOUR_EMAIL@gmail.com" 
     sender_password = "YOUR_APP_PASSWORD" 
     receiver_email = "TEST_RECEIVER@example.com"
-    # CHANGE THESE TWO LINES:
     smtp_server = "smtp.gmail.com"
-    smtp_port = 465  # Use 465 for SSL
-    # ----------------------
+    smtp_port = 465 
 
     try:
         msg = MIMEMultipart()
@@ -115,17 +112,20 @@ def send_confirmation_email(data):
             f"for the job role {data['position']} "
             f"having skills: {', '.join(data['skills'])}."
         )
-        
         msg.attach(MIMEText(body, 'plain'))
 
-        # CHANGE THIS BLOCK TO USE SMTP_SSL:
-        server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+        # ADDED timeout=10 to prevent hanging
+        print("DEBUG: Attempting to connect to Gmail...")
+        server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=10)
+        
         server.login(sender_email, sender_password)
         server.sendmail(sender_email, receiver_email, msg.as_string())
         server.quit()
         print(f"DEBUG: Email sent successfully to {receiver_email}")
+        
     except Exception as e:
-        print(f"DEBUG: Failed to send email. Error: {e}")
+        # This will now catch the error quickly instead of hanging
+        print(f"DEBUG: Email Error: {e}")
 
 def extract_text_from_file(file_bytes, filename):
     ext = filename.split('.')[-1].lower()
