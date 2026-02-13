@@ -94,13 +94,14 @@ def save_to_json_file(data):
 
 # NEW HELPER: Send Confirmation Email
 def send_confirmation_email(data):
-    # --- CONFIGURATION (FILL THESE IN TO TEST) ---
-    sender_email = "shawnstanley365@gmail.com" 
-    sender_password = "lmcurhbcskpceysc " # Use an App Password if using Gmail 2FA
-    receiver_email = "shawnstanley365@gmail.com" # The email you want to send the test to
+    # --- CONFIGURATION ---
+    sender_email = "YOUR_EMAIL@gmail.com" 
+    sender_password = "YOUR_APP_PASSWORD" 
+    receiver_email = "TEST_RECEIVER@example.com"
+    # CHANGE THESE TWO LINES:
     smtp_server = "smtp.gmail.com"
-    smtp_port = 587
-    # ---------------------------------------------
+    smtp_port = 465  # Use 465 for SSL
+    # ----------------------
 
     try:
         msg = MIMEMultipart()
@@ -109,20 +110,18 @@ def send_confirmation_email(data):
         msg['Subject'] = f"Referral Confirmation: {data['candidate_name']}"
 
         body = (
-    f"You have submitted a referral for {data['candidate_name']}.\n\n"
-    f"EMAIL:    {data['contact']}\n"
-    f"JOB ROLE: {data['position']}\n"
-    f"SKILLS:   {', '.join(data['skills'])}"
-)
+            f"You have submitted a referral for {data['candidate_name']}, "
+            f"with email {data['contact']} "
+            f"for the job role {data['position']} "
+            f"having skills: {', '.join(data['skills'])}."
+        )
         
         msg.attach(MIMEText(body, 'plain'))
 
-        # Connect to server
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls() 
+        # CHANGE THIS BLOCK TO USE SMTP_SSL:
+        server = smtplib.SMTP_SSL(smtp_server, smtp_port)
         server.login(sender_email, sender_password)
-        text = msg.as_string()
-        server.sendmail(sender_email, receiver_email, text)
+        server.sendmail(sender_email, receiver_email, msg.as_string())
         server.quit()
         print(f"DEBUG: Email sent successfully to {receiver_email}")
     except Exception as e:
