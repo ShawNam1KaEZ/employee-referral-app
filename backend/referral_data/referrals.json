@@ -177,5 +177,92 @@
         "why_fit": "computer science student seeking a software development role to ap",
         "resume_path": "resume_file\\1244124124_avsav.pdf",
         "original_filename": "Shawn_Stanley_Resume_edttt.pdf"
+    },
+    {
+        "id": "a6a99b75-a438-4c15-aa9b-0215c3d1d107",
+        "employee_id": "23",
+        "candidate_name": "avad",
+        "contact": "asv@adva.vads",
+        "position": "sr_data_mis_analyst",
+        "skills": [
+            "excel",
+            "sql"
+        ],
+        "why_fit": "asvasdabadsva",
+        "resume_path": "resume_file\\23_avad.pdf",
+        "original_filename": "Shawn_Stanley_Resume_edttt.pdf"
+    },
+    {
+        "id": "087f6c9a-99d3-4468-b593-e2600ec6df82",
+        "employee_id": "123",
+        "candidate_name": "ascsc",
+        "contact": "akscbk@saca.sac",
+        "position": "sr_data_mis_analyst",
+        "skills": [
+            "data_automation",
+            "excel",
+            "ms_access",
+            "power_bi",
+            "power_pivot",
+            "power_query",
+            "relational_databases",
+            "sql",
+            "vba"
+        ],
+        "why_fit": " jbladv",
+        "resume_path": "resume_file\\123_ascsc.pdf",
+        "original_filename": "Shawn_Stanley_Resume_edttt.pdf"
+    },
+    {
+        "id": "6c14501d-43ed-45fc-9cba-6bd7c10317f5",
+        "employee_id": "21",
+        "candidate_name": "javdslav",
+        "contact": "jvak@asv.akjsv",
+        "position": "sr_data_mis_analyst",
+        "skills": [
+            "data_automation",
+            "ms_access",
+            "power_bi",
+            "relational_databases",
+            "sql",
+            "vba",
+            "excel"
+        ],
+        "why_fit": "ajbdvlbsalbvl jabsdvblsavdlasdv",
+        "resume_path": "resume_file\\21_javdslav.pdf",
+        "original_filename": "Shawn_Stanley_Resume_edttt.pdf"
+    },
+    {
+        "id": "92554504-e9a9-4a7d-8f7e-2f79c30e32de",
+        "employee_id": "213",
+        "candidate_name": "nansd snsndlv",
+        "contact": "aknvlkda@lkndla.nds",
+        "position": "sr_data_mis_analyst",
+        "skills": [
+            "ms_access",
+            "excel",
+            "power_pivot",
+            "sql",
+            "relational_databases"
+        ],
+        "why_fit": "la sdlvlas jsbdvjsadv",
+        "resume_path": "resume_file\\213_nansd_snsndlv.pdf",
+        "original_filename": "Shawn_Stanley_Resume_edttt.pdf"
+    },
+    {
+        "id": "9416ee61-e036-4eea-9268-10bb3bff911d",
+        "employee_id": "323",
+        "candidate_name": "nldsv lkndsalkv",
+        "contact": "lkndslkv@vsd.va",
+        "position": "sr_data_mis_analyst",
+        "skills": [
+            "ms_access",
+            "excel",
+            "data_automation",
+            "sql"
+        ],
+        "why_fit": "kjbjbs lsclakncslkas",
+        "resume_path": "resume_file\\323_nldsv_lkndsalkv.pdf",
+        "original_filename": "Shawn_Stanley_Resume_edttt.pdf"
     }
 ]

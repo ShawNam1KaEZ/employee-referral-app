@@ -3,6 +3,11 @@ import os
 import uuid
 import re
 import io
+# NEW IMPORTS FOR EMAIL
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Annotated
@@ -86,6 +91,42 @@ def save_to_json_file(data):
     file_data.append(data)
     with open(DATA_FILE, "w") as f:
         json.dump(file_data, f, indent=4)
+
+# NEW HELPER: Send Confirmation Email
+def send_confirmation_email(data):
+    # --- CONFIGURATION (FILL THESE IN TO TEST) ---
+    sender_email = "shawnstanley365@gmail.com" 
+    sender_password = "lmcurhbcskpceysc " # Use an App Password if using Gmail 2FA
+    receiver_email = "shawnstanley365@gmail.com" # The email you want to send the test to
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
+    # ---------------------------------------------
+
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = receiver_email
+        msg['Subject'] = f"Referral Confirmation: {data['candidate_name']}"
+
+        body = (
+    f"You have submitted a referral for {data['candidate_name']}.\n\n"
+    f"EMAIL:    {data['contact']}\n"
+    f"JOB ROLE: {data['position']}\n"
+    f"SKILLS:   {', '.join(data['skills'])}"
+)
+        
+        msg.attach(MIMEText(body, 'plain'))
+
+        # Connect to server
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls() 
+        server.login(sender_email, sender_password)
+        text = msg.as_string()
+        server.sendmail(sender_email, receiver_email, text)
+        server.quit()
+        print(f"DEBUG: Email sent successfully to {receiver_email}")
+    except Exception as e:
+        print(f"DEBUG: Failed to send email. Error: {e}")
 
 def extract_text_from_file(file_bytes, filename):
     ext = filename.split('.')[-1].lower()
@@ -257,5 +298,8 @@ async def submit_referral(
         db.add(Referral(**ref_data))
         db.commit()
     finally: db.close()
+
+    # SEND CONFIRMATION EMAIL (Just for test)
+    send_confirmation_email(ref_data)
 
     return {"status": "success", "message": "Referral submitted successfully!"}

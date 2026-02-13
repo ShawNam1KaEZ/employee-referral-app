@@ -1,6 +1,8 @@
 // frontend/src/App.jsx
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
+// --- ADDED LOGO IMPORT ---
+import navsanLogo from './assets/NAVSANlogo.png' 
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; 
 
@@ -159,6 +161,8 @@ function App() {
   const [allSkills, setAllSkills] = useState([])
   const [roleSkillsMap, setRoleSkillsMap] = useState({}) 
   const [loading, setLoading] = useState(true)
+  // NEW: State for submission loading status
+  const [submitting, setSubmitting] = useState(false)
 
   // Search States
   const [roleSearch, setRoleSearch] = useState("") 
@@ -294,6 +298,9 @@ function App() {
       setErrors(allErrors);
       return
     }
+
+    setSubmitting(true) // START LOADING
+
     const data = new FormData()
     data.append('employee_id', formData.employee_id);
     data.append('candidate_name', formData.candidate_name);
@@ -312,7 +319,9 @@ function App() {
       setErrors({})
       setView('roles');
       window.scrollTo(0, 0);
+      setSubmitting(false) // STOP LOADING ON SUCCESS
     } catch (err) {
+      setSubmitting(false) // STOP LOADING ON ERROR
       const detail = err.response?.data?.detail
       let errorMsg = "An error occurred";
       const newErrors = {};
@@ -357,7 +366,11 @@ function App() {
         width: '100%',
         maxWidth: '1000px', 
         padding: '0 20px',
-        letterSpacing: '0.5px'
+        letterSpacing: '0.5px',
+        // --- ADDED FLEXBOX FOR LOGO ALIGNMENT ---
+        display: 'flex',
+        alignItems: 'center',
+        gap: '15px'
     },
 
     // Main Card
@@ -375,17 +388,44 @@ function App() {
     
     // Internal Headings
     header: { textAlign: 'center', color: '#212529', marginBottom: '30px', fontSize: '1.75rem', fontWeight: '700' },
-    section: { marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid #e9ecef' },
-    sectionTitle: { fontSize: '1.2rem', color: '#495057', marginBottom: '20px', fontWeight: '600', borderLeft: '4px solid #0056b3', paddingLeft: '10px' },
+    section: { marginBottom: '40px', paddingBottom: '20px', borderBottom: '1px solid #e9ecef' },
+    sectionTitle: { fontSize: '1.5rem', color: '#3f4144', marginBottom: '20px', fontWeight: '600', borderLeft: '4px solid #0152a8', paddingLeft: '10px' },
     subHeading: { fontSize: '1.2rem', color: '#495057', marginBottom: '20px', marginTop: '30px', fontWeight: '600', borderLeft: '4px solid #0056b3', paddingLeft: '10px' },
     separator: { border: '0', borderTop: '1px solid #e9ecef', margin: '30px 0 20px 0' },
     
     // Form Fields
-    field: { marginBottom: '20px' },
-    label: { display: 'block', fontWeight: '500', marginBottom: '8px', color: '#495057', fontSize: '0.95rem' },
+    field: { marginBottom: '35px' },
+    label: { display: 'block', fontWeight: '500', marginBottom: '8px', color: '#2b2d30', fontSize: '1.12rem' },
     input: (error) => ({ width: '100%', padding: '12px', fontSize: '1rem', borderRadius: '4px', border: error ? '1px solid #dc3545' : '1px solid #ced4da', outline: 'none', backgroundColor: '#ffffff', color: '#212529', boxSizing: 'border-box', transition: 'border-color 0.2s' }),
     errorMsg: { color: '#dc3545', fontSize: '0.85rem', marginTop: '5px', display: 'block' },
     
+    // NEW STYLES FOR TAG INPUT WRAPPER
+    skillsWrapper: (error) => ({
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'flex-start', // Changed from center to handle multi-line better
+        gap: '8px',
+        width: '100%',
+        padding: '6px',
+        borderRadius: '4px',
+        border: error ? '1px solid #dc3545' : '1px solid #ced4da',
+        backgroundColor: '#ffffff',
+        minHeight: '50px',
+        boxSizing: 'border-box',
+        cursor: 'text',
+        transition: 'border-color 0.2s'
+    }),
+    ghostInput: {
+        border: 'none',
+        outline: 'none',
+        fontSize: '1rem',
+        width: '100%', // Changed from flex: 1 to force new line
+        color: '#212529',
+        backgroundColor: 'transparent',
+        padding: '6px 2px', // Adjusted padding
+        marginTop: '2px'
+    },
+
     // Buttons
     button: { backgroundColor: '#0056b3', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '4px', fontSize: '1rem', cursor: 'pointer', fontWeight: '500', marginTop: '10px' },
     submitBtn: { backgroundColor: '#28a745', color: 'white', border: 'none', padding: '14px 24px', borderRadius: '6px', fontSize: '1.1rem', cursor: 'pointer', fontWeight: '600', width: '100%', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' },
@@ -394,7 +434,7 @@ function App() {
     dropdown: { marginTop: '5px', maxHeight: '200px', overflowY: 'auto', backgroundColor: '#fff', border: '1px solid #ced4da', borderRadius: '4px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', position: 'absolute', width: '100%', zIndex: 10 },
     dropdownItem: { padding: '12px 15px', cursor: 'pointer', borderBottom: '1px solid #f1f3f5', color: '#212529' },
     skillContainer: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' },
-    skillChip: { padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', cursor: 'pointer', border: '1px solid #0056b3', backgroundColor: '#e7f1ff', color: '#0056b3', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: '500' },
+    skillChip: { padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem', cursor: 'pointer', border: '1px solid #0056b3', backgroundColor: '#d5e5fabb', color: '#0056b3', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: '600', whiteSpace: 'nowrap' },
     toast: (type) => ({ position: 'fixed', bottom: '20px', right: '20px', padding: '15px 25px', backgroundColor: type === 'error' ? '#dc3545' : '#28a745', color: 'white', borderRadius: '6px', zIndex: 1000, boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }),
     
     // ROLE GRID STYLES
@@ -443,16 +483,20 @@ function App() {
           opacity: 1; 
         }
         :-ms-input-placeholder { 
-         color: #6c757d !important;
+          color: #6c757d !important;
         }
         ::-ms-input-placeholder { 
-         color: #6c757d !important;
+          color: #6c757d !important;
         }
       `}</style>
 
       {/* GLOBAL HEADER BAR */}
       <div style={styles.headerBar}>
-        <div style={styles.brand}>Navsan Employee Referrals</div>
+        <div style={styles.brand}>
+            {/* --- ADDED LOGO IMAGE --- */}
+            <img src={navsanLogo} alt="Navsan Logo" style={{height: '45px', width: 'auto'}} />
+            Employee Referrals
+        </div>
       </div>
 
       {/* --- VIEW 1: ROLE SELECTION --- */}
@@ -524,7 +568,7 @@ function App() {
             <h2 style={styles.sectionTitle}>Referral Details</h2>
             <div style={styles.field}>
                 <label style={styles.label}>ID</label>
-                <input name="employee_id" placeholder="Employee ID" type="text" value={formData.employee_id} onChange={handleChange} autoComplete="off" style={styles.input(errors.employee_id)} />
+                <input name="employee_id" placeholder="Your Employee ID" type="text" value={formData.employee_id} onChange={handleChange} autoComplete="off" style={styles.input(errors.employee_id)} />
                 {errors.employee_id && <div style={styles.errorMsg}>{errors.employee_id}</div>}
             </div>
             <div style={styles.field}>
@@ -540,7 +584,7 @@ function App() {
 
             <hr style={styles.separator} />
             <h3 style={styles.subHeading}>Target Position</h3>
-            <div style={styles.field}>
+            <div style={{...styles.field, marginTop: '30px'}}>
                 <div style={{display:'flex', gap:'10px'}}>
                     <input value={formData.positionLabel} readOnly style={{...styles.input(false), backgroundColor:'#f8f9fa', color:'#495057', cursor:'not-allowed', fontWeight:'600'}} />
                     <button style={styles.backBtn} onClick={() => setView('roles')}>Change</button>
@@ -548,40 +592,109 @@ function App() {
             </div>
             </div>
 
-            <div style={styles.section}>
-                <h2 style={styles.sectionTitle}>Skills Validation</h2>
-                <div style={{...styles.field, position:'relative'}} ref={skillWrapperRef}>
-                <label style={styles.label}>Select Skills for {formData.positionLabel}</label>
-                <input 
-                    value={skillSearch} 
-                    onChange={e => { setSkillSearch(e.target.value); setShowSkillDropdown(true); }} 
-                    onClick={() => setShowSkillDropdown(true)}
-                    autoComplete="off"
-                    style={styles.input(errors.skills)} 
-                    placeholder={availableSkillIds.length > 0 ? "Type to search skills..." : "No skills configured for this role"} 
-                />
-                {showSkillDropdown && availableSkillIds.length > 0 && (
-                    <div style={styles.dropdown} ref={skillDropdownRef}>
-                    {filteredDropdownSkills.length > 0 ? (
-                        filteredDropdownSkills.map(s => (
-                            <div key={s.id} onClick={() => toggleSkill(s.id)} style={styles.dropdownItem} onMouseEnter={(e)=>e.target.style.background='#f8f9fa'} onMouseLeave={(e)=>e.target.style.background='#fff'}>{s.label}</div>
-                        ))
-                    ) : (<div style={{padding:'10px', color:'#999', fontSize:'0.9rem'}}>No matching skills found</div>)}
+<div style={styles.section}>
+    <h2 style={styles.sectionTitle}>Skills Validation</h2>
+    
+    {/* --- MODIFIED SKILLS INPUT WITH BUBBLES INSIDE --- */}
+    <div style={{...styles.field, position:'relative', marginTop: '30px'}} ref={skillWrapperRef}>
+        <label style={styles.label}>Select Skills for {formData.positionLabel}</label>
+        
+        {/* WRAPPER DIV ACTING AS THE INPUT BOX */}
+        <div 
+            style={styles.skillsWrapper(errors.skills)} 
+            onClick={() => document.getElementById('skill-input-field').focus()}
+        >
+            {/* SELECTED SKILLS BUBBLES NOW INSIDE */}
+            {selectedSkillObjects.map(s => (
+                <div key={s.id} onClick={(e) => { e.stopPropagation(); toggleSkill(s.id); }} style={styles.skillChip}>
+                    {s.label} <span style={{fontWeight:'bold', marginLeft:'4px'}}>×</span>
+                </div>
+            ))}
+            
+            {/* GHOST INPUT FOR SEARCHING */}
+            <input 
+                id="skill-input-field"
+                value={skillSearch} 
+                onChange={e => { setSkillSearch(e.target.value); setShowSkillDropdown(true); }} 
+                onClick={() => setShowSkillDropdown(true)}
+                autoComplete="off"
+                style={styles.ghostInput}
+                placeholder={availableSkillIds.length > 0 ? "Type to search skills..." : "No skills configured for this role"} 
+            />
+        </div>
+
+        {showSkillDropdown && availableSkillIds.length > 0 && (
+    <div style={{
+        ...styles.dropdown, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        maxHeight: '250px', 
+        overflow: 'hidden'   
+    }} ref={skillDropdownRef}>
+        
+        {/* Scrollable list of skills */}
+        <div style={{ overflowY: 'auto', flex: 1 }}>
+            {filteredDropdownSkills.length > 0 ? (
+                filteredDropdownSkills.map(s => (
+                    <div 
+                        key={s.id} 
+                        onClick={() => toggleSkill(s.id)} 
+                        style={styles.dropdownItem} 
+                        onMouseEnter={(e)=>e.target.style.background='#f8f9fa'} 
+                        onMouseLeave={(e)=>e.target.style.background='#fff'}
+                    >
+                        {s.label}
                     </div>
-                )}
-                <div style={styles.skillContainer}>
-                    {selectedSkillObjects.map(s => (
-                    <div key={s.id} onClick={() => toggleSkill(s.id)} style={styles.skillChip}>{s.label} <span style={{fontWeight:'bold', marginLeft:'4px'}}>×</span></div>
-                    ))}
-                </div>
-                {errors.skills && <div style={styles.errorMsg}>{errors.skills}</div>}
-                </div>
-                <div style={styles.field}>
-                    <label style={styles.label}>Why This Person Is a Good Fit</label>
-                    <textarea name="why_fit" rows="4" value={formData.why_fit} onChange={handleChange} autoComplete="off" style={{...styles.input(errors.why_fit), fontFamily:'inherit'}} placeholder="Briefly explain why this person is the ideal candidate for this specific role. Focus on connecting their skills to the job requirements and highlighting unique strengths or achievements that go beyond their resume summary." />
-                    {errors.why_fit && <div style={styles.errorMsg}>{errors.why_fit}</div>}
-                </div>
-            </div>
+                ))
+            ) : (
+                <div style={{padding:'10px', color:'#999999', fontSize:'0.9rem'}}>No matching skills found</div>
+            )}
+        </div>
+
+        {/* Pinned Done Button - Centered with reduced height */}
+        <div style={{ 
+            padding: '5px 10px', // Reduced vertical padding from 10px to 5px
+            borderTop: '1px solid #eee', 
+            display: 'flex',      // Added flex to center
+            justifyContent: 'flex-start', // Centers the button
+            backgroundColor: '#f2f8fe',
+            zIndex: 11 
+        }}>
+            <button 
+                type="button"
+                onClick={(e) => { 
+                    e.preventDefault();
+                    e.stopPropagation(); 
+                    setShowSkillDropdown(false); 
+                }}
+                style={{
+                    padding: '6px 20px', // Slightly wider for better looks in center
+                    backgroundColor: '#0c6cd3',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem', // Slightly smaller font to match reduced height
+                    fontWeight: '600'
+                }}
+            >
+                Done
+            </button>
+        </div>
+    </div>
+)}
+        {errors.skills && <div style={styles.errorMsg}>{errors.skills}</div>}
+    </div>
+    {/* ------------------------------------------------ */}
+
+    <div style={{...styles.field, marginTop: '60px'}}>
+        <label style={styles.label}>Why This Person Is a Good Fit</label>
+        <textarea name="why_fit" rows="4" value={formData.why_fit} onChange={handleChange} autoComplete="off" onPaste={(e) => { e.preventDefault();
+            showToast("Copy-pasting is disabled for this field. Please write a unique endorsement.", "error");}} 
+            style={{...styles.input(errors.why_fit), fontFamily:'inherit'}} placeholder="Briefly explain why this person is the ideal candidate for this specific role. Focus on connecting their skills to the job requirements and highlighting unique strengths or achievements that go beyond their resume summary." />
+        {errors.why_fit && <div style={styles.errorMsg}>{errors.why_fit}</div>}
+    </div>
+</div>
 
             <div>
                 <h2 style={styles.sectionTitle}>Resume Upload</h2>
@@ -590,7 +703,19 @@ function App() {
                     <input type="file" onChange={handleFile} style={{display:'inline-block'}} accept=".pdf,.doc,.docx,.png,.jpg" autoComplete="off" />
                 </div>
                 {errors.resume && <div style={{...styles.errorMsg, textAlign:'center', marginBottom:'20px'}}>{errors.resume}</div>}
-                <button onClick={handleSubmit} style={styles.submitBtn}>Submit Referral</button>
+                <button 
+                    onClick={handleSubmit} 
+                    disabled={submitting} // DISABLE IF SUBMITTING
+                    style={{
+                        ...styles.submitBtn, 
+                        // CHANGE COLOR IF SUBMITTING
+                        backgroundColor: submitting ? '#6c757d' : '#28a745', 
+                        cursor: submitting ? 'not-allowed' : 'pointer'
+                    }}
+                >
+                    {/* CHANGE TEXT IF SUBMITTING */}
+                    {submitting ? 'Submitting...' : 'Submit Referral'}
+                </button>
             </div>
         </div>
       )}
